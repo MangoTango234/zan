@@ -43,8 +43,7 @@ final class TransformController: ObservableObject {
     }
 
     func run(shortcutKey: String) {
-        guard let action = actions?.actions.first(where: { $0.shortcutKey == shortcutKey }),
-              action.enabled else { return }
+        guard let action = actions?.actions.first(where: { $0.shortcutKey == shortcutKey }) else { return }
         run(action)
     }
 

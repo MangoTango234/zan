@@ -11,24 +11,18 @@ struct MenuContentView: View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Divider()
-            DictationStatusView()
-            Divider()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    VoiceSectionView()
-                    Divider()
-                    ActionsSectionView()
-                    Divider()
-                    HistorySectionView()
-                    Divider()
-                    ApiKeySectionView()
-                    Divider()
-                    SystemSectionView()
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionCard(accent: .purple) { ActionsSectionView() }
+                    SectionCard(accent: .blue) { VoiceSectionView() }
+                    SectionCard { HistorySectionView() }
+                    SectionCard { ApiKeySectionView() }
+                    SectionCard { SystemSectionView() }
                 }
                 .padding(14)
             }
-            .frame(minHeight: 400, maxHeight: 520)
+            .frame(minHeight: 400, maxHeight: 540)
 
             Divider()
             footer
@@ -75,15 +69,58 @@ struct MenuContentView: View {
     }
 }
 
-// MARK: - Section header helper
+// MARK: - Section building blocks
 
+/// A visually distinct card that groups one section. An optional accent tints a
+/// thin top edge so Voice and Actions read as clearly different areas.
+struct SectionCard<Content: View>: View {
+    var accent: Color?
+    @ViewBuilder var content: Content
+
+    init(accent: Color? = nil, @ViewBuilder content: () -> Content) {
+        self.accent = accent
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            content
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(accent?.opacity(0.06) ?? Color(.windowBackgroundColor).opacity(0.6))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(accent?.opacity(0.5) ?? Color(.separatorColor).opacity(0.6),
+                              lineWidth: accent == nil ? 1 : 1.5)
+        )
+    }
+}
+
+/// Prominent section header: tinted icon + bold title, with optional subtitle.
 struct SectionHeader: View {
     let title: String
     let systemImage: String
+    var subtitle: String? = nil
+
     var body: some View {
-        Label(title, systemImage: systemImage)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 7) {
+                Image(systemName: systemImage)
+                    .font(.callout)
+                    .foregroundStyle(.tint)
+                Text(title)
+                    .font(.headline)
+            }
+            if let subtitle {
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 }
 

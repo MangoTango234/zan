@@ -26,7 +26,6 @@ struct Action: Identifiable, Codable, Equatable {
     var id = UUID()
     var name: String
     var detail: String
-    var enabled: Bool = true
     var shortcutKey: String
     var engine: Engine = .ai
     /// Used when engine == .ai

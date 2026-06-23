@@ -12,3 +12,6 @@ xcuserdata/
 
 # Secrets (none are committed; API key lives in the Keychain)
 *.env
+
+# Dashboard-generated project summary (local)
+PROJECT.md

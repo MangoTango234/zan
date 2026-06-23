@@ -9,8 +9,9 @@ struct ActionsSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                SectionHeader(title: "Actions", systemImage: "wand.and.stars")
+            HStack(alignment: .top) {
+                SectionHeader(title: "Text", systemImage: "wand.and.stars",
+                              subtitle: "Select text anywhere, then press an action's hotkey")
                 Spacer()
                 Button { actions.addAction() } label: {
                     Image(systemName: "plus.circle")
@@ -19,16 +20,16 @@ struct ActionsSectionView: View {
                 .help("Add an action")
             }
 
-            Text("Select text in any app, then press an action's hotkey.")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
-
-            if let status = transforms.statusMessage {
+            // Only surface in-progress and error states here; successful "done"
+            // feedback shows in the on-screen HUD, not as lingering text.
+            if transforms.isRunning {
                 HStack(spacing: 6) {
-                    if transforms.isRunning { ProgressView().controlSize(.small) }
-                    Text(status).font(.caption2)
-                        .foregroundStyle(transforms.lastError == nil ? Color.secondary : Color.red)
+                    ProgressView().controlSize(.small)
+                    Text(transforms.statusMessage ?? "Working…")
+                        .font(.caption2).foregroundStyle(.secondary)
                 }
+            } else if let error = transforms.lastError {
+                Text(error).font(.caption2).foregroundStyle(.red)
             }
 
             ForEach($actions.actions) { $action in
@@ -42,7 +43,6 @@ struct ActionRow: View {
     @Binding var action: Action
     @EnvironmentObject var actions: ActionStore
     @State private var expanded: Bool
-    @State private var showInfo = false
     @State private var showDeleteConfirm = false
 
     init(action: Binding<Action>) {
@@ -54,6 +54,16 @@ struct ActionRow: View {
 
     private var nameMissing: Bool {
         action.name.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var hasShortcut: Bool {
+        KeyboardShortcuts.getShortcut(for: KeyboardShortcuts.Name(action.shortcutKey)) != nil
+    }
+    private var shortcutLabel: String {
+        if let sc = KeyboardShortcuts.getShortcut(for: KeyboardShortcuts.Name(action.shortcutKey)) {
+            return "\(sc)"
+        }
+        return "Set hotkey"
     }
 
     var body: some View {
@@ -75,34 +85,22 @@ struct ActionRow: View {
 
                 Spacer()
 
-                Button { showInfo = true } label: {
-                    Image(systemName: "info.circle").font(.caption2).foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .help("What this action does")
-                .popover(isPresented: $showInfo, arrowEdge: .bottom) {
-                    ActionInfoPopover(action: action)
-                }
-
-                KeyboardShortcuts.Recorder(for: KeyboardShortcuts.Name(action.shortcutKey))
-                    .controlSize(.small)
-                    .frame(width: 116)
-
-                if !action.isBuiltIn {
-                    Button { showDeleteConfirm = true } label: {
-                        Image(systemName: "trash").foregroundStyle(.red)
+                // Compact hotkey badge; the full recorder lives in the expanded
+                // view (the recorder control can't be made narrow inline).
+                if !expanded {
+                    Button { withAnimation(.easeInOut(duration: 0.12)) { expanded = true } } label: {
+                        Text(shortcutLabel)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(hasShortcut ? Color.primary : Color.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(Color(.windowBackgroundColor).opacity(0.9)))
+                            .overlay(Capsule().strokeBorder(Color(.separatorColor)))
                     }
                     .buttonStyle(.plain)
-                    .confirmationDialog(
-                        "Delete \"\(action.name.isEmpty ? "this action" : action.name)\"?",
-                        isPresented: $showDeleteConfirm, titleVisibility: .visible
-                    ) {
-                        Button("Delete", role: .destructive) { actions.delete(action) }
-                        Button("Cancel", role: .cancel) { }
-                    } message: {
-                        Text("This removes the action and its prompt. Its hotkey is freed.")
-                    }
+                    .help("Set hotkey")
                 }
+
             }
 
             if !action.detail.isEmpty && !expanded {
@@ -113,45 +111,101 @@ struct ActionRow: View {
             }
 
             if expanded {
-                if nameMissing {
-                    Label("Add a name to save this action", systemImage: "exclamationmark.circle")
-                        .font(.caption2).foregroundStyle(.orange)
-                }
+                Divider().padding(.vertical, 2)
+                expandedDetail
+            }
+        }
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.windowBackgroundColor).opacity(0.5)))
+    }
 
-                Toggle("Enabled", isOn: $action.enabled)
-                    .toggleStyle(.switch).font(.caption)
-                    .onChange(of: action.enabled) { _, _ in actions.save() }
+    // MARK: - Expanded editor
 
-                TextField("Description", text: $action.detail)
-                    .textFieldStyle(.roundedBorder).font(.caption2)
+    private var expandedDetail: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if nameMissing {
+                Label("Add a name to save this action", systemImage: "exclamationmark.circle")
+                    .font(.caption2).foregroundStyle(.orange)
+            }
+
+            // About block: a short, editable reminder of what this action does.
+            VStack(alignment: .leading, spacing: 5) {
+                Label("About this action", systemImage: "info.circle")
+                    .font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+                TextField("Short description, e.g. \"Rewrite in a friendly tone\"",
+                          text: $action.detail, axis: .vertical)
+                    .lineLimit(1...3)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.caption)
                     .onChange(of: action.detail) { _, _ in actions.save() }
+                Text(usageHint)
+                    .font(.caption2).foregroundStyle(.tertiary)
+            }
+            .padding(8)
+            .background(RoundedRectangle(cornerRadius: 8).fill(Color(.textBackgroundColor).opacity(0.5)))
+            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color(.separatorColor).opacity(0.6)))
 
-                Picker("Output", selection: $action.output) {
+            // Settings
+            LabeledRow("Hotkey") {
+                KeyboardShortcuts.Recorder(for: KeyboardShortcuts.Name(action.shortcutKey))
+                    .controlSize(.small)
+            }
+
+            LabeledRow("Output") {
+                Picker("", selection: $action.output) {
                     ForEach(Action.Output.allCases) { Text($0.label).tag($0) }
                 }
-                .pickerStyle(.menu).font(.caption)
+                .labelsHidden().fixedSize()
                 .onChange(of: action.output) { _, newValue in
-                    // Swap the starter template to match the new output, but only
-                    // if the prompt is still an unedited template.
                     if action.engine == .ai && Action.starterPrompts.contains(action.prompt) {
                         action.prompt = Action.starterPrompt(for: newValue)
                     }
                     actions.save()
                 }
+            }
 
-                if action.engine == .prefix {
+            if action.engine == .prefix {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Prefix").font(.caption2).foregroundStyle(.secondary)
                     TextField("Prefix", text: $action.prefix)
                         .textFieldStyle(.roundedBorder).font(.caption.monospaced())
                         .onChange(of: action.prefix) { _, _ in actions.save() }
-                } else {
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Prompt").font(.caption2).foregroundStyle(.secondary)
                     PromptEditor(text: $action.prompt) { actions.save() }
                 }
             }
+
+            if !action.isBuiltIn {
+                Button { showDeleteConfirm = true } label: {
+                    Label("Delete action", systemImage: "trash")
+                        .font(.caption).foregroundStyle(.red)
+                }
+                .buttonStyle(.plain)
+                .confirmationDialog(
+                    "Delete \"\(action.name.isEmpty ? "this action" : action.name)\"?",
+                    isPresented: $showDeleteConfirm, titleVisibility: .visible
+                ) {
+                    Button("Delete", role: .destructive) { actions.delete(action) }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("This removes the action and its prompt. Its hotkey is freed.")
+                }
+            }
         }
-        .padding(8)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.windowBackgroundColor).opacity(0.5)))
-        .opacity(action.enabled ? 1 : 0.5)
+        .padding(.leading, 4)
+    }
+
+    private var usageHint: String {
+        let outcome: String
+        switch action.output {
+        case .replaceSelection: outcome = "replaces your selection with the result"
+        case .popup:            outcome = "shows the result in a popup (your text is unchanged)"
+        case .copy:             outcome = "copies the result to the clipboard"
+        }
+        return "Select text, press the hotkey, and it \(outcome)."
     }
 
     private var outputIcon: String {
@@ -159,53 +213,6 @@ struct ActionRow: View {
         case .replaceSelection: return "arrow.2.squarepath"
         case .popup:            return "rectangle.on.rectangle"
         case .copy:             return "doc.on.doc"
-        }
-    }
-}
-
-/// Plain-language explanation of a single action: what it does, how to trigger
-/// it, and what its output mode means.
-struct ActionInfoPopover: View {
-    let action: Action
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(action.name.isEmpty ? "New action" : action.name)
-                .font(.headline)
-
-            Text(action.detail.isEmpty ? "No description yet. Add one in the expanded view." : action.detail)
-                .font(.callout)
-                .foregroundStyle(action.detail.isEmpty ? .secondary : .primary)
-
-            Divider()
-
-            infoRow("How to use", "Select text in any app, then press this action's hotkey.")
-            infoRow("Engine", engineText)
-            infoRow("Output", outputText)
-        }
-        .padding(14)
-        .frame(width: 270)
-    }
-
-    private func infoRow(_ label: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(label).font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
-            Text(value).font(.caption)
-        }
-    }
-
-    private var engineText: String {
-        switch action.engine {
-        case .ai:     return "Runs your prompt through the AI text model."
-        case .prefix: return "Adds a fixed prefix to the selection (no AI)."
-        }
-    }
-
-    private var outputText: String {
-        switch action.output {
-        case .replaceSelection: return "Replaces your selected text with the result."
-        case .popup:            return "Shows the result in a popup; your text stays unchanged."
-        case .copy:             return "Copies the result to your clipboard."
         }
     }
 }

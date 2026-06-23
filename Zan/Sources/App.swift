@@ -29,6 +29,12 @@ struct ZanApp: App {
                 .onAppear {
                     transforms.bind(actions: actions, history: history)
                     dictation.history = history
+                    // Start at login by default (first run only); the user can
+                    // turn it off in the System section afterward.
+                    if !UserDefaults.standard.bool(forKey: "didSetupLoginItem") {
+                        LoginItem.setEnabled(true)
+                        UserDefaults.standard.set(true, forKey: "didSetupLoginItem")
+                    }
                     if settings.openWindowOnLaunch {
                         welcome.showOnce(content: AnyView(
                             WelcomeView()

@@ -88,30 +88,7 @@ struct DictationStatusView: View {
                 }
             }
 
-            if let url = dictation.lastRecordingURL, !dictation.isRecording {
-                HStack(spacing: 6) {
-                    Image(systemName: "waveform.circle").foregroundStyle(.tint)
-                    Text(url.lastPathComponent)
-                        .font(.caption2.monospaced())
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    if let bytes = dictation.lastRecordingBytes {
-                        Text("(\(byteString(bytes)))")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button("Reveal") {
-                        NSWorkspace.shared.activateFileViewerSelecting([url])
-                    }
-                    .font(.caption2)
-                    .buttonStyle(.link)
-                }
-            }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(Color(.windowBackgroundColor).opacity(0.4))
     }
 
     private var permissionWarning: some View {
@@ -134,9 +111,5 @@ struct DictationStatusView: View {
                 .font(.caption2)
                 .buttonStyle(.link)
         }
-    }
-
-    private func byteString(_ bytes: Int) -> String {
-        ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .file)
     }
 }

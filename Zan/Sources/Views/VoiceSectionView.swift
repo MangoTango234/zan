@@ -9,9 +9,10 @@ struct VoiceSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Voice to Text", systemImage: "mic")
-            Text("Dictate with one hotkey. Speech is transcribed and typed at your cursor.")
-                .font(.caption2).foregroundStyle(.tertiary)
+            SectionHeader(title: "Voice", systemImage: "mic",
+                          subtitle: "Dictate with one hotkey, typed at your cursor")
+
+            DictationStatusView()
 
             LabeledRow("Trigger key") {
                 KeyboardShortcuts.Recorder(for: .dictationTrigger)
