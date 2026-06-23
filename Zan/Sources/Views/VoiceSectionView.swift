@@ -59,7 +59,11 @@ struct VoiceSectionView: View {
         case .openai:
             return "Uses your OpenAI key. Note: Claude/Anthropic has no speech-to-text API, so it can't transcribe voice."
         case .local:
-            return "Runs on your Mac with Whisper. No key, fully private. First use downloads the model (a few hundred MB)."
+            if BuildInfo.whisperKitAvailable {
+                return "Runs on your Mac with Whisper. No key, fully private. First use downloads the model (a few hundred MB)."
+            } else {
+                return "Not in this build. On-device transcription is opt-in: rebuild with WhisperKit (see README), or use the OpenAI engine."
+            }
         }
     }
 

@@ -1,3 +1,4 @@
+#if canImport(WhisperKit)
 import Foundation
 import WhisperKit
 
@@ -29,3 +30,4 @@ actor WhisperKitEngine {
         return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
+#endif

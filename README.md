@@ -41,8 +41,11 @@ never clobber what you had copied.
 ## Requirements
 
 - macOS 14 or later (Apple Silicon or Intel)
-- An [OpenAI API key](https://platform.openai.com/api-keys) (you pay OpenAI for
-  usage)
+- An [OpenAI API key](https://platform.openai.com/api-keys) for cloud
+  transcription and (optionally) text actions. Not needed if you use on-device
+  transcription + Anthropic for text.
+- Optionally an [Anthropic API key](https://console.anthropic.com/) to use Claude
+  for text actions/cleanup
 - [XcodeGen](https://github.com/yonik/XcodeGen) to generate the Xcode project
   (`brew install xcodegen`)
 - Xcode 15+
@@ -66,6 +69,29 @@ open build/Build/Products/Debug/Zan.app
 ```
 
 The app is a menu-bar agent: look for the **waveform icon** at the top-right.
+
+### Optional: on-device transcription (WhisperKit)
+
+By default the build uses **OpenAI** for voice transcription and does **not**
+include WhisperKit, so the clone stays small and builds fast. To enable
+**on-device** transcription (Whisper running locally, no API key, fully private),
+regenerate the project with the overlay spec:
+
+```sh
+xcodegen generate --spec project-whisperkit.yml
+open Zan.xcodeproj   # or rebuild from the command line
+```
+
+This pulls in the WhisperKit package (CoreML; larger first build). The Swift code
+uses `#if canImport(WhisperKit)`, so it compiles either way: without the overlay,
+the "On-device" engine option is simply unavailable at runtime. The first time
+you transcribe with a given Whisper model, it downloads (a few hundred MB) and is
+then cached. Switch back to the lightweight build any time with a plain
+`xcodegen generate`.
+
+> Note: Anthropic/Claude has **no speech-to-text API**, so transcription is
+> either OpenAI (cloud) or WhisperKit (on-device). Claude can still power the
+> text actions and dictation cleanup.
 
 ### Signing & permissions
 
