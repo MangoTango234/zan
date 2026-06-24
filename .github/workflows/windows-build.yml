@@ -1,0 +1,47 @@
+name: Windows build
+
+# Compile-check the Windows (WPF / .NET 8) port on every change under windows/
+# or shared/. WPF only builds on Windows, so this runs on a windows-latest runner.
+on:
+  push:
+    paths:
+      - "windows/**"
+      - "shared/**"
+      - ".github/workflows/windows-build.yml"
+  pull_request:
+    paths:
+      - "windows/**"
+      - "shared/**"
+      - ".github/workflows/windows-build.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore windows/Zan.sln
+
+      - name: Build (Release)
+        run: dotnet build windows/Zan.sln -c Release --no-restore
+
+      - name: Publish single-file (win-x64)
+        run: >
+          dotnet publish windows/src/Zan/Zan.csproj
+          -c Release -r win-x64
+          -p:PublishSingleFile=true --self-contained true
+          -o windows/publish
+
+      - name: Upload Zan.exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zan-win-x64
+          path: windows/publish/Zan.exe
+          if-no-files-found: error
