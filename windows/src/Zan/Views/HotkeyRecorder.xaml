@@ -1,0 +1,12 @@
+<UserControl x:Class="Zan.Views.HotkeyRecorder"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel Orientation="Horizontal">
+        <TextBox x:Name="Display" Width="190" IsReadOnly="True"
+                 Padding="4,3" VerticalContentAlignment="Center"
+                 PreviewKeyDown="Display_PreviewKeyDown"
+                 LostFocus="Display_LostFocus" />
+        <Button Content="Set" Margin="6,0,0,0" Padding="12,4" Click="Set_Click" />
+        <Button Content="Clear" Margin="6,0,0,0" Padding="12,4" Click="Clear_Click" />
+    </StackPanel>
+</UserControl>

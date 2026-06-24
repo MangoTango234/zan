@@ -25,8 +25,11 @@ public sealed class ActionItem
     /// <summary>Fixed string prepended for engine "prefix".</summary>
     public string? Prefix { get; set; }
 
-    /// <summary>Stable identity used to bind/persist this action's hotkey (milestone 3).</summary>
+    /// <summary>Stable identity used to bind/persist this action's hotkey.</summary>
     public string ShortcutKey { get; set; } = "";
+
+    /// <summary>Global hotkey, formatted like "Ctrl+Alt+P". Empty = unassigned.</summary>
+    public string Hotkey { get; set; } = "";
 
     public bool IsBuiltIn { get; set; }
 
@@ -39,6 +42,7 @@ public sealed class ActionItem
         Prompt = Prompt,
         Prefix = Prefix,
         ShortcutKey = ShortcutKey,
+        Hotkey = Hotkey,
         IsBuiltIn = IsBuiltIn,
     };
 }
