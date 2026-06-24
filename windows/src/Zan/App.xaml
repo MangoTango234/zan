@@ -1,0 +1,9 @@
+<Application x:Class="Zan.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <!-- No StartupUri: Zan lives only in the tray, there is no main window.
+         Shutdown happens explicitly from the tray Quit item. -->
+    <Application.Resources>
+    </Application.Resources>
+</Application>

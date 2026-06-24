@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Zan</AssemblyName>
+    <RootNamespace>Zan</RootNamespace>
+    <Version>0.1.0</Version>
+    <!-- Tray-only utility: no console window, no main window. -->
+    <ApplicationIcon></ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Tray icon + context menu for WPF. netcoreapp3.1 TFM is compatible with net8.0-windows. -->
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Tray icon image, embedded as a WPF resource (pack:// URI). -->
+    <Resource Include="Assets\zan.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ship the canonical shared catalog next to the exe so it loads at runtime.
+         shared/actions.json is the cross-platform source of truth (see windows/README.md). -->
+    <Content Include="..\..\..\shared\actions.json" Link="actions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>
