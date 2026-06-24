@@ -21,19 +21,25 @@ Output: `src/Zan/bin/Release/net8.0-windows/win-x64/publish/Zan.exe`.
 
 ## Layout
 - `Zan.sln`, `src/Zan/` — the WPF project.
-- `src/Zan/App.xaml(.cs)` — tray-only app lifecycle (no main window).
-- `src/Zan/TrayIconFactory.cs` — tray icon + right-click menu.
-- `src/Zan/Models/ActionCatalog.cs` — schema for `shared/actions.json`.
-- `src/Zan/Services/ActionStore.cs` — loads the shared catalog.
+- `src/Zan/App.xaml(.cs)` — tray-only app lifecycle (no main window); opens
+  Settings on demand and on first run when no key is configured.
+- `src/Zan/TrayIconFactory.cs` — tray icon + right-click menu (Settings, Quit).
+- `src/Zan/Models/` — `ActionCatalog`/`ActionItem`/`ActionsDocument`, `AppSettings`.
+- `src/Zan/Services/` — `AppPaths` (%APPDATA%\Zan), `ActionStore`,
+  `SettingsStore`, `CredentialStore` (Win32 Credential Manager P/Invoke),
+  `KeyStore` (OpenAI/Anthropic keys).
+- `src/Zan/Views/SettingsWindow.xaml(.cs)` — keys, provider/model pickers,
+  dictation cleanup, editable actions list.
 - `src/Zan/Assets/zan.png` — tray icon.
 - `shared/actions.json` (repo root) is copied next to the exe at build time and
-  is the source of truth for built-in actions. See `windows/README.md` for the
-  full milestone plan.
+  is the seed for built-in actions + the dictation cleanup prompt. User edits
+  persist to `%APPDATA%\Zan\actions.json` and `settings.json`. See
+  `windows/README.md` for the full milestone plan.
 
 ## Milestones
-1. **Tray app shell (this milestone)** — icon + menu + Quit, no main window,
-   loads the shared catalog.
-2. Settings window, keys, provider/model pickers, editable actions.
+1. ✅ **Tray app shell** — icon + menu + Quit, no main window, loads the catalog.
+2. ✅ **Settings** — keys (Credential Manager), provider/model pickers, editable
+   actions persisted to `%APPDATA%\Zan`.
 3. Global hotkeys.
 4. Selection read -> action -> deliver.
 5. Dictation (OpenAI) + HUD.

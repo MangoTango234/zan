@@ -1,0 +1,159 @@
+<Window x:Class="Zan.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Zan Settings"
+        Width="640" Height="600"
+        MinWidth="560" MinHeight="480"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="Padding" Value="4,3" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="Padding" Value="4,3" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="MinWidth" Value="72" />
+        </Style>
+        <Style x:Key="SectionLabel" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Gray" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+        </Style>
+    </Window.Resources>
+
+    <TabControl Margin="8">
+
+        <!-- API Keys -->
+        <TabItem Header="API Keys">
+            <StackPanel Margin="16">
+                <TextBlock Text="OpenAI API key" Style="{StaticResource SectionLabel}" Margin="0,0,0,0" />
+                <TextBlock x:Name="OpenAIStatus" Style="{StaticResource Hint}" Margin="0,2,0,4" />
+                <StackPanel Orientation="Horizontal">
+                    <PasswordBox x:Name="OpenAIKeyBox" Width="400" Padding="4,3" />
+                    <Button Content="Save" Margin="8,0,0,0" Click="SaveOpenAIKey_Click" />
+                    <Button Content="Clear" Margin="6,0,0,0" Click="ClearOpenAIKey_Click" />
+                </StackPanel>
+
+                <TextBlock Text="Anthropic API key" Style="{StaticResource SectionLabel}" />
+                <TextBlock x:Name="AnthropicStatus" Style="{StaticResource Hint}" Margin="0,2,0,4" />
+                <StackPanel Orientation="Horizontal">
+                    <PasswordBox x:Name="AnthropicKeyBox" Width="400" Padding="4,3" />
+                    <Button Content="Save" Margin="8,0,0,0" Click="SaveAnthropicKey_Click" />
+                    <Button Content="Clear" Margin="6,0,0,0" Click="ClearAnthropicKey_Click" />
+                </StackPanel>
+
+                <TextBlock Style="{StaticResource Hint}" Margin="0,16,0,0"
+                           Text="Keys are stored in Windows Credential Manager, never written to disk in plaintext and never logged. Anthropic has no speech-to-text, so transcription uses OpenAI or on-device Whisper." />
+            </StackPanel>
+        </TabItem>
+
+        <!-- Providers & Models -->
+        <TabItem Header="Providers &amp; Models">
+            <StackPanel Margin="16">
+                <TextBlock Text="Text provider (actions + dictation cleanup)" Style="{StaticResource SectionLabel}" Margin="0,0,0,0" />
+                <ComboBox x:Name="TextProviderCombo" Width="220" HorizontalAlignment="Left"
+                          SelectionChanged="TextProvider_Changed" />
+                <TextBlock Text="Model" Margin="0,8,0,0" />
+                <ComboBox x:Name="TextModelCombo" Width="320" HorizontalAlignment="Left" IsEditable="True" />
+
+                <Separator Margin="0,18" />
+
+                <TextBlock Text="Transcription provider (dictation)" Style="{StaticResource SectionLabel}" Margin="0,0,0,0" />
+                <ComboBox x:Name="TranscriptionProviderCombo" Width="220" HorizontalAlignment="Left"
+                          SelectionChanged="TranscriptionProvider_Changed" />
+                <TextBlock Text="Model" Margin="0,8,0,0" />
+                <ComboBox x:Name="TranscriptionModelCombo" Width="320" HorizontalAlignment="Left" IsEditable="True" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                    <Button Content="Save" Click="SaveProviders_Click" />
+                    <TextBlock x:Name="ProvidersStatus" Foreground="Green" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </StackPanel>
+            </StackPanel>
+        </TabItem>
+
+        <!-- Dictation -->
+        <TabItem Header="Dictation">
+            <StackPanel Margin="16">
+                <CheckBox x:Name="CleanupEnabledCheck"
+                          Content="Clean up dictated text with AI before inserting" />
+
+                <TextBlock Text="Trigger mode" Style="{StaticResource SectionLabel}" />
+                <ComboBox x:Name="DictationModeCombo" Width="300" HorizontalAlignment="Left" />
+
+                <TextBlock Text="Cleanup prompt" Style="{StaticResource SectionLabel}" />
+                <TextBox x:Name="CleanupPromptBox" Height="180" TextWrapping="Wrap"
+                         AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                    <Button Content="Save" Click="SaveDictation_Click" />
+                    <TextBlock x:Name="DictationStatus" Foreground="Green" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </StackPanel>
+            </StackPanel>
+        </TabItem>
+
+        <!-- Actions -->
+        <TabItem Header="Actions">
+            <Grid Margin="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="210" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <DockPanel Grid.Column="0" Margin="0,0,14,0">
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="Add" Click="AddAction_Click" />
+                        <Button Content="Delete" Margin="6,0,0,0" Click="DeleteAction_Click" />
+                    </StackPanel>
+                    <ListBox x:Name="ActionsList" DisplayMemberPath="Name"
+                             SelectionChanged="ActionsList_SelectionChanged" />
+                </DockPanel>
+
+                <StackPanel Grid.Column="1" x:Name="ActionDetailPanel" IsEnabled="False">
+                    <TextBlock Text="Name" />
+                    <TextBox x:Name="ActionName" />
+
+                    <TextBlock Text="Description" Margin="0,8,0,0" />
+                    <TextBox x:Name="ActionDetail" />
+
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Engine" />
+                            <ComboBox x:Name="ActionEngine" SelectionChanged="ActionEngine_Changed" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Output" />
+                            <ComboBox x:Name="ActionOutput" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock x:Name="PromptLabel" Text="Prompt" Margin="0,8,0,0" />
+                    <TextBox x:Name="ActionPrompt" Height="150" TextWrapping="Wrap"
+                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+
+                    <TextBlock x:Name="PrefixLabel" Text="Prefix" Margin="0,8,0,0" />
+                    <TextBox x:Name="ActionPrefix" />
+
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                        <Button Content="Apply" Click="ApplyAction_Click" />
+                        <Button Content="Save all" Margin="6,0,0,0" Click="SaveActions_Click" />
+                        <TextBlock x:Name="ActionsStatus" Foreground="Green" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </TabItem>
+
+    </TabControl>
+</Window>
