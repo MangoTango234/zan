@@ -39,6 +39,8 @@ public partial class SettingsWindow : Window
         LoadProvidersTab();
         LoadDictationTab();
         LoadActionsTab();
+        LoadHistoryTab();
+        LoadSystemTab();
         _loading = false;
     }
 
@@ -277,5 +279,48 @@ public partial class SettingsWindow : Window
 
         _onHotkeysChanged();
         ActionsStatus.Text = "Saved";
+    }
+
+    // MARK: - History
+
+    private void LoadHistoryTab()
+    {
+        HistoryList.ItemsSource = HistoryStore.All().ToList();
+    }
+
+    private void HistoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (HistoryList.SelectedItem is not HistoryEntry entry)
+        {
+            HistoryDetail.Text = string.Empty;
+            return;
+        }
+        HistoryDetail.Text = $"Input:\n{entry.Input}\n\nOutput:\n{entry.Output}";
+    }
+
+    private void RefreshHistory_Click(object sender, RoutedEventArgs e)
+    {
+        LoadHistoryTab();
+        HistoryStatus.Text = $"{HistoryList.Items.Count} entries";
+    }
+
+    private void ClearHistory_Click(object sender, RoutedEventArgs e)
+    {
+        HistoryStore.Clear();
+        LoadHistoryTab();
+        HistoryDetail.Text = string.Empty;
+        HistoryStatus.Text = "Cleared";
+    }
+
+    // MARK: - System
+
+    private void LoadSystemTab()
+    {
+        LaunchAtLoginCheck.IsChecked = LoginItem.IsEnabled;
+    }
+
+    private void LaunchAtLogin_Click(object sender, RoutedEventArgs e)
+    {
+        LoginItem.SetEnabled(LaunchAtLoginCheck.IsChecked == true);
     }
 }

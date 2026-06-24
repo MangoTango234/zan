@@ -21,4 +21,6 @@ internal static class AppPaths
     public static string ActionsFile() => Path.Combine(AppDataDir(), "actions.json");
 
     public static string SettingsFile() => Path.Combine(AppDataDir(), "settings.json");
+
+    public static string HistoryFile() => Path.Combine(AppDataDir(), "history.json");
 }
