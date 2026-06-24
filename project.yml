@@ -1,6 +1,6 @@
 name: Zan
 options:
-  bundleIdPrefix: dev.local
+  bundleIdPrefix: com.futodi
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
@@ -49,7 +49,7 @@ targets:
         NSMicrophoneUsageDescription: "Zan records your microphone only while you hold or toggle the dictation hotkey, to transcribe your speech."
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.local.zan
+        PRODUCT_BUNDLE_IDENTIFIER: com.futodi.zan
         PRODUCT_NAME: Zan
         CODE_SIGN_ENTITLEMENTS: Zan/Zan.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: ""
