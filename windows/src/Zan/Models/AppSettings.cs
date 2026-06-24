@@ -29,6 +29,9 @@ public sealed class AppSettings
     /// <summary>Dictation trigger behavior: "toggle" or "holdToTalk".</summary>
     public string DictationMode { get; set; } = "toggle";
 
+    /// <summary>Global hotkey that triggers dictation, formatted like "Ctrl+Alt+Space". Empty = unassigned.</summary>
+    public string DictationHotkey { get; set; } = "";
+
     // Quick-pick presets (free-text too, so newer model IDs can be typed in).
     // Kept in sync with macOS AppSettings.
     [JsonIgnore] public static readonly string[] TranscriptionModels = { "gpt-4o-mini-transcribe", "gpt-4o-transcribe", "whisper-1" };

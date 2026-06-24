@@ -28,8 +28,12 @@ Output: `src/Zan/bin/Release/net8.0-windows/win-x64/publish/Zan.exe`.
 - `src/Zan/Services/` — `AppPaths` (%APPDATA%\Zan), `ActionStore`,
   `SettingsStore`, `CredentialStore` (Win32 Credential Manager P/Invoke),
   `KeyStore` (OpenAI/Anthropic keys).
+- `src/Zan/Input/` — `HotkeyCombo` (parse/format + Win32 conversion),
+  `HotkeyService` (RegisterHotKey via a message-only window), `HotkeyCoordinator`
+  (binds each action + dictation hotkey to a handler).
 - `src/Zan/Views/SettingsWindow.xaml(.cs)` — keys, provider/model pickers,
-  dictation cleanup, editable actions list.
+  dictation cleanup, editable actions list, per-action + dictation hotkeys.
+- `src/Zan/Views/HotkeyRecorder.xaml(.cs)` — control to capture a hotkey combo.
 - `src/Zan/Assets/zan.png` — tray icon.
 - `shared/actions.json` (repo root) is copied next to the exe at build time and
   is the seed for built-in actions + the dictation cleanup prompt. User edits
@@ -40,7 +44,8 @@ Output: `src/Zan/bin/Release/net8.0-windows/win-x64/publish/Zan.exe`.
 1. ✅ **Tray app shell** — icon + menu + Quit, no main window, loads the catalog.
 2. ✅ **Settings** — keys (Credential Manager), provider/model pickers, editable
    actions persisted to `%APPDATA%\Zan`.
-3. Global hotkeys.
+3. ✅ **Global hotkeys** — per-action + dictation hotkey registration (Win32
+   RegisterHotKey), captured in Settings. Handlers are placeholders until m4/m5.
 4. Selection read -> action -> deliver.
 5. Dictation (OpenAI) + HUD.
 6. On-device Whisper.

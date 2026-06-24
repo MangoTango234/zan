@@ -18,19 +18,21 @@ public partial class SettingsWindow : Window
     private readonly AppSettings _settings;
     private readonly List<ActionItem> _sharedActions;
     private readonly ObservableCollection<ActionItem> _actions;
+    private readonly Action _onHotkeysChanged;
 
     private bool _loading;
 
     private const string StarterPrompt =
         "Rewrite the selected text to [describe the change you want]. Keep the meaning. Return only the result.";
 
-    public SettingsWindow(ActionCatalog seed, AppSettings settings, List<ActionItem> actions)
+    public SettingsWindow(ActionCatalog seed, AppSettings settings, List<ActionItem> actions, Action onHotkeysChanged)
     {
         InitializeComponent();
         _seed = seed;
         _settings = settings;
         _sharedActions = actions;
         _actions = new ObservableCollection<ActionItem>(actions.Select(a => a.Clone()));
+        _onHotkeysChanged = onHotkeysChanged;
 
         _loading = true;
         LoadKeysTab();
@@ -146,6 +148,7 @@ public partial class SettingsWindow : Window
         CleanupEnabledCheck.IsChecked = _settings.CleanupEnabled;
         DictationModeCombo.ItemsSource = new[] { "Toggle (press to start/stop)", "Hold to talk" };
         DictationModeCombo.SelectedIndex = _settings.DictationMode == "holdToTalk" ? 1 : 0;
+        DictationHotkeyRecorder.Hotkey = _settings.DictationHotkey;
         CleanupPromptBox.Text = _settings.CleanupPrompt;
     }
 
@@ -153,8 +156,10 @@ public partial class SettingsWindow : Window
     {
         _settings.CleanupEnabled = CleanupEnabledCheck.IsChecked == true;
         _settings.DictationMode = DictationModeCombo.SelectedIndex == 1 ? "holdToTalk" : "toggle";
+        _settings.DictationHotkey = DictationHotkeyRecorder.Hotkey;
         _settings.CleanupPrompt = CleanupPromptBox.Text;
         SettingsStore.Save(_settings);
+        _onHotkeysChanged();
         DictationStatus.Text = "Saved";
     }
 
@@ -189,6 +194,7 @@ public partial class SettingsWindow : Window
         };
         ActionPrompt.Text = item.Prompt ?? string.Empty;
         ActionPrefix.Text = item.Prefix ?? string.Empty;
+        ActionHotkeyRecorder.Hotkey = item.Hotkey;
         UpdateEngineFieldVisibility();
         _loading = false;
     }
@@ -224,6 +230,7 @@ public partial class SettingsWindow : Window
         };
         item.Prompt = ActionPrompt.Text;
         item.Prefix = ActionPrefix.Text;
+        item.Hotkey = ActionHotkeyRecorder.Hotkey;
 
         ActionsList.Items.Refresh();
         ActionsStatus.Text = "Applied (not yet saved)";
@@ -268,6 +275,7 @@ public partial class SettingsWindow : Window
         _sharedActions.Clear();
         _sharedActions.AddRange(list);
 
+        _onHotkeysChanged();
         ActionsStatus.Text = "Saved";
     }
 }
