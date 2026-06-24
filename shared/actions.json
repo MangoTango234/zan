@@ -1,0 +1,48 @@
+{
+  "_comment": "Canonical Zan built-in catalog, shared across platforms (macOS + Windows). Keep in sync with macOS Action.defaults (Zan/Sources/Models/Action.swift) and AppSettings.defaultCleanupPrompt. engine: ai | prefix. output: replaceSelection | popup | copy.",
+  "dictationCleanupPrompt": "Lightly clean up this dictated text. Fix grammar, punctuation, capitalization, and remove filler words such as um, uh, and like. Keep my wording and meaning. Do not rewrite or summarize. Never use em dashes; use commas or restructure the sentence. Return only the cleaned text.",
+  "actions": [
+    {
+      "name": "Proofread",
+      "detail": "Fix grammar, punctuation, spelling. Keep wording.",
+      "engine": "ai",
+      "output": "replaceSelection",
+      "prompt": "Proofread the selected text. Fix grammar, punctuation, capitalization, and spelling. Keep my wording and meaning. Do not rewrite or summarize. Never use em dashes; use commas or restructure the sentence. Return only the corrected text."
+    },
+    {
+      "name": "Make professional",
+      "detail": "Rewrite in a clear, professional tone.",
+      "engine": "ai",
+      "output": "replaceSelection",
+      "prompt": "Rewrite the selected text in a clear, professional tone. No corporate jargon, no filler. Keep the original meaning. Never use em dashes; use commas or restructure the sentence. Return only the rewritten text."
+    },
+    {
+      "name": "Strip em dashes",
+      "detail": "Replace em dashes with other punctuation, nothing else.",
+      "engine": "ai",
+      "output": "replaceSelection",
+      "prompt": "Replace every em dash in the selected text with appropriate punctuation (comma, colon, parentheses, or a sentence break). Change nothing else. Return only the edited text."
+    },
+    {
+      "name": "Translate to English",
+      "detail": "Show an English translation in a popup (doesn't change text).",
+      "engine": "ai",
+      "output": "popup",
+      "prompt": "Detect the language of the following text and translate it into natural, fluent English. Return only the translation, with no quotes, labels, or commentary."
+    },
+    {
+      "name": "Summarize",
+      "detail": "One sentence, or up to 3 bullets, in a popup.",
+      "engine": "ai",
+      "output": "popup",
+      "prompt": "Summarize what the following text is about as briefly as possible. Prefer a single short sentence. Only if one sentence cannot capture it, use at most 3 short bullet points, each starting with \"- \". Return only the summary, no preamble."
+    },
+    {
+      "name": "Open in r.jina.ai",
+      "detail": "Prepend https://r.jina.ai/ to the selected URL.",
+      "engine": "prefix",
+      "output": "replaceSelection",
+      "prefix": "https://r.jina.ai/"
+    }
+  ]
+}
