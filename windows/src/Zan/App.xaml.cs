@@ -3,6 +3,7 @@ using Hardcodet.Wpf.TaskbarNotification;
 using Zan.Input;
 using Zan.Models;
 using Zan.Services;
+using Zan.Transform;
 using Zan.Views;
 
 namespace Zan;
@@ -10,14 +11,16 @@ namespace Zan;
 /// <summary>
 /// Application entry point. Zan is a tray-only utility: at startup it loads the
 /// catalog seed, user settings, and user actions, installs the tray icon, and
-/// registers global hotkeys. The Settings window is opened on demand (and on
-/// first run, when no API key is configured yet).
+/// registers global hotkeys. Action hotkeys run end to end (read selection -> run
+/// -> deliver); the Settings window opens on demand (and on first run).
 /// </summary>
-public partial class App : Application
+public partial class App : Application, ITransformUi
 {
     private TaskbarIcon? _tray;
     private SettingsWindow? _settingsWindow;
     private HotkeyCoordinator? _hotkeys;
+    private TransformController? _transform;
+    private TransformHud? _hud;
 
     private ActionCatalog _seed = new();
     private AppSettings _settings = new();
@@ -32,6 +35,7 @@ public partial class App : Application
         _actions = ActionStore.Load(_seed);
 
         _tray = TrayIconFactory.Create(OpenSettings, Quit);
+        _transform = new TransformController(_settings, this);
 
         _hotkeys = new HotkeyCoordinator(OnActionHotkey, OnDictationHotkey, OnHotkeyConflicts);
         _hotkeys.Rebind(_actions, _settings);
@@ -61,19 +65,12 @@ public partial class App : Application
     private void RebindHotkeys() => _hotkeys?.Rebind(_actions, _settings);
 
     // MARK: - Hotkey handlers
-    //
-    // Milestone 3 wires the hotkeys end to end with placeholder feedback. The
-    // real behavior arrives later: triggering an action (read selection -> run ->
-    // deliver) in milestone 4, and dictation (record -> transcribe -> insert) in
-    // milestone 5.
 
-    private void OnActionHotkey(ActionItem action)
-    {
-        _tray?.ShowBalloonTip("Zan", $"Action triggered: {action.Name}", BalloonIcon.Info);
-    }
+    private void OnActionHotkey(ActionItem action) => _transform?.Run(action);
 
     private void OnDictationHotkey()
     {
+        // Dictation (record -> transcribe -> insert) arrives in milestone 5.
         _tray?.ShowBalloonTip("Zan", "Dictation triggered", BalloonIcon.Info);
     }
 
@@ -85,8 +82,36 @@ public partial class App : Application
             BalloonIcon.Warning);
     }
 
+    // MARK: - ITransformUi
+
+    public void ShowWorking(string title)
+    {
+        _hud?.Close();
+        _hud = new TransformHud(title);
+        _hud.Show(); // ShowActivated=False, so this does not steal focus from the target app
+    }
+
+    public void HideWorking()
+    {
+        _hud?.Close();
+        _hud = null;
+    }
+
+    public void ShowResult(string title, string body)
+    {
+        new PopupWindow(title, body).Show();
+    }
+
+    public void Notify(string message)
+    {
+        _tray?.ShowBalloonTip("Zan", message, BalloonIcon.Info);
+    }
+
+    // MARK: - Lifecycle
+
     private void Quit()
     {
+        _hud?.Close();
         _hotkeys?.Dispose();
         _hotkeys = null;
         _tray?.Dispose();
@@ -96,6 +121,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _hud?.Close();
         _hotkeys?.Dispose();
         _hotkeys = null;
         _tray?.Dispose();
