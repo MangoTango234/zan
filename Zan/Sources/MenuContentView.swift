@@ -43,17 +43,16 @@ struct MenuContentView: View {
 
     private var footer: some View {
         HStack {
-            Button("Reset actions") { showResetConfirm = true }
-                .font(.caption)
-                .confirmationDialog(
-                    "Reset all actions to defaults?",
-                    isPresented: $showResetConfirm, titleVisibility: .visible
-                ) {
-                    Button("Reset", role: .destructive) { actions.resetToDefaults() }
-                    Button("Cancel", role: .cancel) { }
-                } message: {
-                    Text("This removes your custom actions and restores the built-in ones. Your edits to built-in prompts are lost.")
+            if showResetConfirm {
+                Text("Reset all?").font(.caption2).foregroundStyle(.secondary)
+                Button("Cancel") { showResetConfirm = false }.font(.caption2)
+                Button { actions.resetToDefaults(); showResetConfirm = false } label: {
+                    Text("Reset").font(.caption2.weight(.semibold)).foregroundStyle(.red)
                 }
+            } else {
+                Button("Reset actions") { showResetConfirm = true }
+                    .font(.caption)
+            }
 
             Spacer()
 

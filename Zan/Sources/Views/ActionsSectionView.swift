@@ -179,19 +179,26 @@ struct ActionRow: View {
             }
 
             if !action.isBuiltIn {
-                Button { showDeleteConfirm = true } label: {
-                    Label("Delete action", systemImage: "trash")
-                        .font(.caption).foregroundStyle(.red)
-                }
-                .buttonStyle(.plain)
-                .confirmationDialog(
-                    "Delete \"\(action.name.isEmpty ? "this action" : action.name)\"?",
-                    isPresented: $showDeleteConfirm, titleVisibility: .visible
-                ) {
-                    Button("Delete", role: .destructive) { actions.delete(action) }
-                    Button("Cancel", role: .cancel) { }
-                } message: {
-                    Text("This removes the action and its prompt. Its hotkey is freed.")
+                if showDeleteConfirm {
+                    HStack(spacing: 8) {
+                        Text("Delete this action?")
+                            .font(.caption2).foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Cancel") { showDeleteConfirm = false }
+                            .font(.caption2).buttonStyle(.plain)
+                        Button { actions.delete(action) } label: {
+                            Text("Delete").font(.caption2.weight(.semibold)).foregroundStyle(.red)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(8)
+                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.red.opacity(0.08)))
+                } else {
+                    Button { showDeleteConfirm = true } label: {
+                        Label("Delete action", systemImage: "trash")
+                            .font(.caption).foregroundStyle(.red)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
