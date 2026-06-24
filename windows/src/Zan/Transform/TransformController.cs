@@ -1,5 +1,6 @@
 using Zan.Injection;
 using Zan.Models;
+using Zan.Services;
 
 namespace Zan.Transform;
 
@@ -80,6 +81,14 @@ internal sealed class TransformController
             _ui.Notify("Empty result.");
             return;
         }
+
+        HistoryStore.Add(new HistoryEntry
+        {
+            Kind = "action",
+            Title = action.Name,
+            Input = selection,
+            Output = result,
+        });
 
         switch (action.Output)
         {

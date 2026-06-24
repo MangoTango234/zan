@@ -27,7 +27,8 @@ Output: `src/Zan/bin/Release/net8.0-windows/win-x64/publish/Zan.exe`.
 - `src/Zan/Models/` — `ActionCatalog`/`ActionItem`/`ActionsDocument`, `AppSettings`.
 - `src/Zan/Services/` — `AppPaths` (%APPDATA%\Zan), `ActionStore`,
   `SettingsStore`, `CredentialStore` (Win32 Credential Manager P/Invoke),
-  `KeyStore` (OpenAI/Anthropic keys).
+  `KeyStore` (OpenAI/Anthropic keys), `HistoryStore` (history.json),
+  `LoginItem` (HKCU Run key, start at login).
 - `src/Zan/Input/` — `HotkeyCombo` (parse/format + Win32 conversion),
   `HotkeyService` (RegisterHotKey via a message-only window), `HotkeyCoordinator`
   (binds each action + dictation hotkey to a handler).
@@ -59,5 +60,6 @@ Output: `src/Zan/bin/Release/net8.0-windows/win-x64/publish/Zan.exe`.
    -> deliver (replace via Ctrl+V / popup / copy), with a working HUD.
 5. Dictation (mic capture -> OpenAI transcription -> cleanup -> insert) + HUD.
 6. On-device Whisper.
-7. Anthropic text, history, launch at login.
+7. ✅ **Anthropic text** (done in m4), **history** (in-app, history.json),
+   **launch at login** (HKCU Run key).
 8. Packaging / signing.
