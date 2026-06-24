@@ -15,6 +15,26 @@ It runs in the menu bar (no Dock icon), keeps your API key in the macOS Keychain
 and sends your audio/text only to the OpenAI API calls you configure. No
 telemetry.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/main1.png" width="280" alt="Text actions: proofread, make professional, translate, summarize, each with a hotkey">
+  &nbsp;
+  <img src="screenshots/main2.png" width="280" alt="Voice: one dictation hotkey, on-device or cloud transcription, optional AI cleanup">
+  &nbsp;
+  <img src="screenshots/main3.png" width="280" alt="AI: choose OpenAI or Anthropic for text; keys stored in the Keychain">
+</p>
+
+<p align="center"><em>Text actions · Voice dictation · AI provider and keys</em></p>
+
+Zan in action:
+
+<p align="center">
+  <img src="screenshots/demo-1.gif" width="420" alt="Zan demo">
+  &nbsp;
+  <img src="screenshots/demo-2.gif" width="420" alt="Zan demo">
+</p>
+
 ## Get Zan
 
 Two ways to use it:
